@@ -1,0 +1,365 @@
+---
+title: "Week 8 IP"
+author: "Peter Kiragu"
+date: "7/10/2020"
+output:
+  pdf_document: default
+  html_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+```
+## 1. Introduction
+
+* The goal of this analysis is to conduct explanatory data analysis to reveals patterns in the data.
+
+* The metric for success is getting meaning information that allows us to understand the variables in our dataset.
+
+### 1.1 Context
+
+A Kenyan entrepreneur has created an online cryptography course and would want to advertise it on her blog. She currently targets audiences originating from various countries. In the past, she ran ads to advertise a related course on the same blog and collected data in the process. She would now like to employ your services as a Data Science Consultant to help her identify which individuals are most likely to click on her ads. 
+
+## 2. Reading & Previewing Data
+
+
+```{r Loading dataframe}
+
+# First we we need to import the dataset
+
+advert_data <- read.csv("advertising.csv")
+
+# Previewing the top of out data
+
+head(advert_data)
+
+# Previewing the bottom of out data
+
+tail(advert_data)
+
+```
+
+## 3. Checking Our Data
+
+```{r Checking elements of dataframe}
+
+
+# Checking the class of the object "advert_data"
+
+class(advert_data)
+
+# Our object is a data frame
+
+# Checking the dimension of our dataset
+
+dim(advert_data)
+
+# Our dataset has 1000 rows and 10 columns
+
+# Checking the structure of our data frame
+
+str(advert_data)
+
+# Our data frame has integer, number and character values
+
+```
+
+
+```{r Checking column names}
+# Getting the names of the columns we will be working with
+
+colnames(advert_data)
+
+# "Daily.Time.Spent.on.Site" , "Age", "Area.Income", "Daily.Internet.Usage", "Ad.Topic.Line"
+# "City", "Male", "Country", "Timestamp", "Clicked.on.Ad" 
+
+```
+
+
+## 4. Cleaning Data
+
+```{r Checking for duplicates}
+
+# Checking for duplicated values in our data set
+
+anyDuplicated(advert_data)
+
+
+# Since there are no duplicated values, no action is required
+
+```
+
+
+```{r Checking missing values}
+
+# Checking if our dataset has any missing values
+
+sum(is.na(advert_data))
+
+# There are no null values in the dataset so no action is required
+
+
+```
+
+
+```{r Extracting the numeric variables}
+# Checking for outliers in our dataset
+
+# To check for outliers, we only need the numerical columns
+# Getting numeric columns from the advert_data
+nums <- unlist(lapply(advert_data, is.numeric)) 
+
+numerical_cols <- advert_data[ ,nums]
+
+head(numerical_cols)
+
+# We can see that we have 6 numeric columns
+#
+
+# Plotting the boxplot to visualize the outliers in the dataset
+
+boxplot(numerical_cols[,-1], horizontal=TRUE, main="Advertising Data")
+
+# Only the Area income column has some outliers of people earning below 20,000
+
+```
+
+## 4. Exploratory Data Analysis
+
+### 4.1 Univariate EDA
+
+```{r Getting mean of numeric variables}
+# Getting the mean of the numeric columns
+
+colMeans(numerical_cols)
+
+```
+
+```{r Getting mode}
+
+# Creating a function for getting the mode 
+
+getmode <- function(v) {
+   uniqv <- unique(v)
+   uniqv[which.max(tabulate(match(v, uniqv)))]
+}
+
+# Getting mode for time spent on site
+
+getmode(numerical_cols$Daily.Time.Spent.on.Site)
+
+# Getting mode for age
+
+getmode(numerical_cols$Age)
+
+# Getting mode for Area Income
+
+getmode(numerical_cols$Area.Income)
+
+# Getting mode for daily internet usage
+
+getmode(numerical_cols$Daily.Internet.Usage)
+
+# Getting mode of male variable
+
+getmode(numerical_cols$Male)
+
+# Getting mode for clicked on ad variable
+
+getmode(numerical_cols$Clicked.on.Ad)
+
+```
+
+
+```{r Getting median values}
+# Finding the median income
+
+median(numerical_cols$Area.Income)
+
+# Finding median age
+
+median(numerical_cols$Age)
+
+# Finding median daily internet usage
+
+median(numerical_cols$Daily.Internet.Usage)
+
+# Finding media for time spent on site
+
+median(numerical_cols$Daily.Time.Spent.on.Site)
+```
+
+
+```{r Getting min & max values}
+
+# Finding min & max area income
+
+min(numerical_cols$Area.Income)
+
+max(numerical_cols$Area.Income)
+
+# Finding min & max daily time spent on site
+
+min(numerical_cols$Daily.Time.Spent.on.Site)
+
+max(numerical_cols$Daily.Time.Spent.on.Site)
+
+# Finding min & max daily internet usage
+
+min(numerical_cols$Daily.Internet.Usage)
+
+max(numerical_cols$Daily.Internet.Usage)
+
+# Finding min & max age
+
+min(numerical_cols$Age)
+
+max(numerical_cols$Age)
+
+```
+
+
+```{r Getting Q1, Q2, Q3 & IQR for Age}
+
+# Getting 1st quantile for age
+
+quantile(numerical_cols$Age, 0.25)
+
+# Getting 2nd quantile for age
+
+quantile(numerical_cols$Age, 0.5)
+
+# Getting 3rd quantile for age
+
+quantile(numerical_cols$Age, 0.75)
+
+# Getting inter-quantile range for age
+
+IQR(numerical_cols$Age)
+
+
+```
+
+```{r Getting Q1, Q2, Q3 & IQR for Area.Income}
+
+# Getting 1st quantile for age
+
+quantile(numerical_cols$Area.Income, 0.25)
+
+# Getting 2nd quantile for age
+
+quantile(numerical_cols$Area.Income, 0.5)
+
+# Getting 3rd quantile for age
+
+quantile(numerical_cols$Area.Income, 0.75)
+
+# Getting inter-quantile range for age
+
+IQR(numerical_cols$Area.Income)
+
+```
+
+```{r Standard deviation & variance for Area.Income}
+
+# Finding std deviation
+
+sd(numerical_cols$Area.Income)
+
+# Getting variance
+
+var(numerical_cols$Area.Income)
+```
+
+```{r}
+# Plotting the histogram for the numerical variables
+
+par(mfrow=c(2, 2))
+
+colnames <- dimnames(numerical_cols)[[2]]
+for (i in colnames) {
+  hist(numerical_cols[ ,i], main= colnames[i], probability=TRUE, col="gray", border="white")
+}
+
+```
+
+
+
+```{r}
+
+# Selecting our columns and assigning variable names to the columns
+
+age <- advert_data$Age
+
+income <- advert_data$Area.Income
+
+male <- advert_data$Male
+
+city <- advert_data$City
+
+time_on_site <- advert_data$Daily.Time.Spent.on.Site
+
+internet_usage <- advert_data$Daily.Internet.Usage
+
+country <- advert_data$Country
+
+clicked_ad <- advert_data$Clicked.on.Ad
+
+topic_line <- advert_data$Ad.Topic.Line
+
+time <- advert_data$Timestamp
+
+```
+
+```{r}
+
+# Scatter plot for age against time sment on site
+
+plot(time_on_site, age, xlab = "Time Spent on Site", ylab = "Age")
+```
+```{r}
+
+# Scatter plot for internet usage against male variable
+
+plot(male, internet_usage, xlab = "Male", ylab = "Internet Usage")
+```
+
+```{r}
+
+# Scatter plot for internet usage against time spent on site
+
+plot(time_on_site, internet_usage, xlab = "Time Spent on Site", ylab = "Internet Usage")
+```
+```{r}
+
+# Scatter plot for time income against time spent on site
+
+plot(time_on_site, income, xlab = "Time Spent on Site", ylab = "Income")
+
+```
+```{r}
+
+# Scatter plot for income against time spent on site
+
+plot(clicked_ad, income, xlab = "Time Spent on Site", ylab = "Income")
+```
+
+
+```{r}
+
+# Getting the correlation between our numeric variables
+
+cor(numerical_cols)
+
+```
+
+```{r}
+
+# Getting covariance for our numeric variables
+
+cov(numerical_cols)
+
+```
+
+
